@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Clips Player</title>
+    <style>
+        body {
+            background-color: black;
+            color: white; /* Optional: in case you need white text color */
+            margin: 0; /* Optional: to remove default browser margins */
+            padding: 0; /* Remove default padding */
+        }
+    </style>
+</head>
+<body>
+    <div id="videoContainer" style="width: 100%;"></div>
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script>
+    var player;
+    var currentVideoIndex = 0;
+    var videos = {{VIDEOS_JSON}};
+
+    function onYouTubeIframeAPIReady() {
+        loadVideo(currentVideoIndex);
+    }
+
+    function loadVideo(index) {
+        if (index < videos.length) {
+            var video = videos[index];
+            var container = document.getElementById('videoContainer');
+            var width = container.offsetWidth;
+            var height = width * (9/16);
+            player = new YT.Player('videoContainer', {
+                height: height,
+                width: width,
+                videoId: video.id,
+                playerVars: {
+                    'autoplay': 1,
+                    'start': video.start,
+                    'end': video.end,
+                    'controls': 0,
+                    'rel': 0,
+                    'showinfo': 0
+                },
+                events: {
+                    'onStateChange': onPlayerStateChange
+                }
+            });
+        }
+    }
+
+    function onPlayerStateChange(event) {
+        if (event.data == YT.PlayerState.ENDED) {
+            currentVideoIndex++;
+            if (currentVideoIndex < videos.length) {
+                player.destroy();
+                loadVideo(currentVideoIndex);
+            }
+        }
+    }
+
+    window.onresize = function() {
+        if (player) {
+            var container = document.getElementById('videoContainer');
+            var width = container.offsetWidth;
+            var height = width * (9/16);
+            player.setSize(width, height);
+        }
+    };
+    </script>
+</body>
+</html>
